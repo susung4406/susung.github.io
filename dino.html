@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>크롬 공룡 게임</title>
+    <style>
+        body {
+            margin: 0;
+    padding: 128px 20px 20px 20px;
+    background-color: #f1f1f1;
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+    user-select: none;
+        }
+        .header {
+            background-color: #f1f1f1;
+            padding: 20px;
+            text-align: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+            position: fixed; 
+            height: 80px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+    .topnav {
+      overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 90px; 
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    font-family: Arial, sans-serif;
+    }
+
+    .topnav a {
+      float: left;
+      display: block;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .topnav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .game-container {
+            background: #f7f7f7;
+    border: 3px solid #535353;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    max-width: 900px;
+    margin: 40px auto 0 auto;
+    width: 100%;
+    margin-top: 40px;
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: #f7f7f7;
+            border-radius: 5px;
+        }
+        
+        .game-info {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #535353;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .score {
+            color: #535353;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .high-score {
+            color: #888;
+            font-size: 16px;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #535353;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #535353;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .game-over h2 {
+            color: #ff4444;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        
+        .restart-btn {
+            background: #535353;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        .restart-btn:hover {
+            background: #333;
+            transform: scale(1.05);
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .start-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #535353;
+            font-size: 18px;
+            text-align: center;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MINI GAME SITE</h1>
+    </div>
+
+    <div class="topnav">
+        <a href="./index.html">메인페이지</a>
+        <a href="./tetris.html">테트리스</a>
+        <a href="./tictactoe.html">틱택토</a>
+        <a href="./dino.html">공룡게임</a>
+        <a href="./reaction.html">반응속도 테스트</a>
+    </div>
+
+    <div class="game-container">
+        <div class="game-info">
+            <div class="score">점수: <span id="score">0</span></div>
+            <div class="high-score">최고 점수: <span id="highScore">0</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="200"></canvas>
+        
+        <div class="controls">
+            스페이스바 또는 위 방향키를 눌러 점프하세요!
+        </div>
+        
+        <div id="startMessage" class="start-message">
+            스페이스바를 눌러 게임을 시작하세요!
+        </div>
+        
+        <div id="gameOver" class="game-over">
+            <h2>GAME OVER!</h2>
+            <div>점수: <span id="finalScore">0</span></div>
+            <div>최고 점수: <span id="finalHighScore">0</span></div>
+            <button class="restart-btn" onclick="restartGame()">다시 시작</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameRunning = false;
+        let gameStarted = false;
+        let gameSpeed = 2;
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('dinoHighScore') || '0');
+        
+        // 게임 객체들
+        const dino = {
+            x: 50,
+            y: 150,
+            width: 40,
+            height: 40,
+            jumping: false,
+            jumpSpeed: 1,
+            gravity: 0.8,
+            jumpPower: -15,
+            color: '#535353'
+        };
+        
+        const ground = {
+            x: 0,
+            y: 190,
+            width: canvas.width,
+            height: 10,
+            color: '#535353'
+        };
+        
+        let obstacles = [];
+        let clouds = [];
+        let gameFrame = 0;
+        
+        // 1. 이미지 객체 생성
+        const dinoImg = new Image();
+        dinoImg.src = 'dino trex.png';
+
+        // 장애물 클래스
+        class Obstacle {
+            constructor() {
+                this.x = canvas.width;
+                this.y = 150;
+                this.width = 20;
+                this.height = 40;
+                this.color = '#535353';
+                this.passed = false;
+            }
+            
+            update() {
+                this.x -= gameSpeed;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            
+            collidesWith(dino) {
+                return dino.x < this.x + this.width &&
+                       dino.x + dino.width > this.x &&
+                       dino.y < this.y + this.height &&
+                       dino.y + dino.height > this.y;
+            }
+        }
+
+        function drawDino() {
+    if (dinoImg.complete && dinoImg.naturalWidth !== 0) {
+        ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+    } else {
+        ctx.fillStyle = dino.color;
+        ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+    }}
+        // 구름 클래스
+        class Cloud {
+            constructor() {
+                this.x = canvas.width + Math.random() * 100;
+                this.y = 30 + Math.random() * 50;
+                this.width = 40 + Math.random() * 20;
+                this.height = 20 + Math.random() * 10;
+                this.speed = 0.5 + Math.random() * 0.5;
+            }
+            
+            update() {
+                this.x -= this.speed;
+            }
+            
+            draw() {
+                ctx.fillStyle = '#ddd';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.width/3, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width/3, this.y, this.width/4, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width/2, this.y, this.width/3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function updateHighScore() {
+            document.getElementById('highScore').textContent = highScore;
+        }
+        
+        
+        function drawGround() {
+            ctx.fillStyle = ground.color;
+            ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+            
+            // 땅 패턴
+            ctx.strokeStyle = ground.color;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i - (gameFrame % 20), ground.y - 2);
+                ctx.lineTo(i - (gameFrame % 20) + 10, ground.y - 2);
+                ctx.stroke();
+            }
+        }
+        
+        function updateDino() {
+            if (dino.jumping) {
+                dino.y += dino.jumpSpeed;
+                dino.jumpSpeed += dino.gravity;
+                
+                if (dino.y >= 150) {
+                    dino.y = 150;
+                    dino.jumping = false;
+                    dino.jumpSpeed = 0;
+                }
+            }
+        }
+        
+        function jump() {
+            if (!dino.jumping) {
+                dino.jumping = true;
+                dino.jumpSpeed = dino.jumpPower;
+            }
+        }
+        
+        function spawnObstacle() {
+            if (gameFrame % (120 - Math.floor(score / 100)) === 0) {
+                obstacles.push(new Obstacle());
+            }
+        }
+        
+        function spawnCloud() {
+            if (gameFrame % 200 === 0) {
+                clouds.push(new Cloud());
+            }
+        }
+        
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].update();
+                
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                } else if (!obstacles[i].passed && obstacles[i].x + obstacles[i].width < dino.x) {
+                    obstacles[i].passed = true;
+                    score += 10;
+                    document.getElementById('score').textContent = score;
+                    
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('dinoHighScore', highScore.toString());
+                        updateHighScore();
+                    }
+                }
+            }
+        }
+        
+        function updateClouds() {
+            for (let i = clouds.length - 1; i >= 0; i--) {
+                clouds[i].update();
+                
+                if (clouds[i].x + clouds[i].width < 0) {
+                    clouds.splice(i, 1);
+                }
+            }
+        }
+        
+        function checkCollision() {
+            for (let obstacle of obstacles) {
+                if (obstacle.collidesWith(dino)) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalHighScore').textContent = highScore;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+        
+        function restartGame() {
+            gameRunning = true;
+            gameStarted = true;
+            score = 0;
+            gameSpeed = 3;
+            gameFrame = 0;
+            obstacles = [];
+            clouds = [];
+            dino.y = 150;
+            dino.jumping = false;
+            dino.jumpSpeed = 0;
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startMessage').style.display = 'none';
+        }
+        
+        function gameLoop() {
+            if (gameRunning) {
+                // 배경 지우기
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 게임 속도 증가
+                if (gameFrame % 300 === 0) {
+                    gameSpeed += 0.3;
+                }
+                
+                // 구름 업데이트
+                updateClouds();
+                clouds.forEach(cloud => cloud.draw());
+                
+                // 땅 그리기
+                drawGround();
+                
+                // 공룡 업데이트 및 그리기
+                updateDino();
+                drawDino();
+                
+                // 장애물 생성 및 업데이트
+                spawnObstacle();
+                spawnCloud();
+                updateObstacles();
+                obstacles.forEach(obstacle => obstacle.draw());
+                
+                // 충돌 검사
+                checkCollision();
+                
+                gameFrame++;
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 키보드 이벤트
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                
+                if (!gameStarted) {
+                    restartGame();
+                } else if (gameRunning) {
+                    jump();
+                }
+            }
+        });
+        
+        // 터치 이벤트 (모바일 지원)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameStarted) {
+                restartGame();
+            } else if (gameRunning) {
+                jump();
+            }
+        });
+        
+        // 클릭 이벤트
+        canvas.addEventListener('click', () => {
+            if (!gameStarted) {
+                restartGame();
+            } else if (gameRunning) {
+                jump();
+            }
+        });
+        
+        // 초기화
+        updateHighScore();
+        
+        // 초기 구름 몇 개 생성
+        for (let i = 0; i < 3; i++) {
+            const cloud = new Cloud();
+            cloud.x = Math.random() * canvas.width;
+            clouds.push(cloud);
+        }
+        
+        // 게임 시작
+        gameLoop();
+    </script>
+</body>
+</html>

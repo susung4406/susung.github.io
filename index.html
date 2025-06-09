@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>통합 미니 게임 사이트트</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .header {
+      background-color: #f1f1f1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .topnav {
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .topnav a {
+      float: left;
+      display: block;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .topnav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .game-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 30px 10px;
+    }
+
+    .game-box {
+      width: 45%;
+      min-width: 300px;
+      background-color: #fafafa;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .game-box img {
+      width: 100%;
+      max-width: 250px;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .game-box {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MINI GAME SITE</h1>
+  <p>간단한 미니 게임들을 즐겨보세요</p>
+</div>
+
+<div class="topnav">
+  <a href="./index.html">메인페이지</a>
+  <a href="./tetris.html">테트리스</a>
+  <a href="./tictactoe.html">틱택토</a>
+  <a href="./dino.html">공룡게임</a>
+  <a href="./reaction.html">반응속도 테스트</a>
+</div>
+
+<div class="game-container">
+  <div class="game-box">
+    <h2>테트리스</h2>
+    <a href="./tetris.html"><img src="./image/tetris.jpg" alt="tetris"></a>
+    <p>테트리스는 다양한 모양의 블록(테트로미노)을 쌓아 가로줄을 완전히 채워 제거하는 퍼즐 게임입니다. 블록은 위에서 아래로 떨어지며, 사용자는 이를 회전하거나 좌우 이동시켜 배치할 수 있습니다. 가로줄이 채워지면 해당 줄이 사라지고 점수가 올라가며, 블록이 쌓여 화면이 가득 차면 게임이 종료됩니다.</p>
+  </div>
+
+  <div class="game-box">
+    <h2>틱택토</h2>
+    <a href="./tictactoe.html"><img src="./image/tictactoe.png" alt="tic-tac-toe"></a>
+    <p>틱택토는 3x3 격자판에서 두 플레이어가 X와 O를 놓아 가로, 세로, 대각선으로 3개를 먼저 연결하는 게임입니다. 플레이어는 자신의 차례에 빈 칸에 기호를 놓고, 먼저 3개를 연결한 플레이어가 승리합니다.</p>
+  </div>
+
+  <div class="game-box">
+    <h2>공룡 게임</h2>
+    <a href="./dino.html"><img src="./image/Dino.jpg" alt="dino"></a>
+    <p>공룡 게임은 사용자가 공룡을 조작하여 장애물을 피하고 최대한 멀리 달리는 게임입니다. 점프와 슬라이드를 통해 장애물을 피하고, 먹이를 먹어 점수를 얻습니다.</p>
+  </div>
+
+  <div class="game-box">
+    <h2>반응속도 테스트</h2>
+    <a href="./reaction.html"><img src="./image/reaction.jpg" alt="reaction test"></a>
+    <p>반응속도 테스트는 화면이 녹색에서 빨간색으로 변할 때 사용자가 얼마나 빠르게 반응하는지를 측정하는 게임입니다.</p>
+  </div>
+</div>
+
+</body>
+</html>

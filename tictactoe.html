@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>2인용 틱택토 게임</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      margin: 0;
+      min-height: 100vh;
+      background-color: #f1f1f1;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #000000;
+    }
+    .header {
+      background-color: #f1f1f1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .topnav {
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .topnav a {
+      float: left;
+      display: block;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .topnav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #b6b6b6;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .cell:hover {
+      background-color: #e0e0e0;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+
+    #resetBtn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+      <h1>MINI GAME SITE</h1>
+      <p>간단한 미니 게임들을 즐겨보세요</p>
+  </div>
+
+  <div class="topnav">
+    <a href="./index.html">메인페이지</a>
+    <a href="./tetris.html">테트리스</a>
+    <a href="./tictactoe.html">틱택토</a>
+    <a href="./dino.html">공룡게임</a>
+    <a href="./reaction.html">반응속도 테스트</a>
+  </div>
+
+  <h1>2인용 틱택토 게임</h1>
+  <div id="board"></div>
+  <div id="status">현재 차례: X</div>
+  <button id="resetBtn">게임 초기화</button>
+
+  <script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let currentPlayer = 'X';
+    let gameActive = true;
+    let gameState = Array(9).fill('');
+
+    const winningConditions = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+
+    function checkWin() {
+      for (let condition of winningConditions) {
+        const [a, b, c] = condition;
+        if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function checkDraw() {
+      return gameState.every(cell => cell !== '');
+    }
+
+    function handleClick(e) {
+      const cellIndex = e.target.getAttribute('data-index');
+      if (!gameActive || gameState[cellIndex] !== '') return;
+
+      gameState[cellIndex] = currentPlayer;
+      e.target.textContent = currentPlayer;
+
+      if (checkWin()) {
+        status.textContent = `승리자: ${currentPlayer}`;
+        gameActive = false;
+        return;
+      }
+
+      if (checkDraw()) {
+        status.textContent = "무승부!";
+        gameActive = false;
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      status.textContent = `현재 차례: ${currentPlayer}`;
+    }
+
+    function resetGame() {
+      gameState.fill('');
+      gameActive = true;
+      currentPlayer = 'X';
+      status.textContent = '현재 차례: X';
+      document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+    }
+
+    function initBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.setAttribute('data-index', i);
+        cell.addEventListener('click', handleClick);
+        board.appendChild(cell);
+      }
+    }
+
+    resetBtn.addEventListener('click', resetGame);
+    initBoard();
+  </script>
+</body>
+</html>

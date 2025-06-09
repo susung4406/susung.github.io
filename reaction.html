@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>반응 속도 테스트</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding-top: 10px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #box {
+      width: 300px;
+      height: 300px;
+      background-color: red;
+      margin: 50px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #result {
+      font-size: 20px;
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .header {
+      background-color: #f1f1f1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .topnav {
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .topnav a {
+      float: left;
+      display: block;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    .topnav a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>MINI GAME SITE</h1>
+  <p>간단한 미니 게임들을 즐겨보세요</p>
+</div>
+
+<div class="topnav">
+  <a href="./index.html">메인페이지</a>
+  <a href="./tetris.html">테트리스</a>
+  <a href="./tictactoe.html">틱택토</a>
+  <a href="./dino.html">공룡게임</a>
+  <a href="./reaction.html">반응속도 테스트</a>
+</div>
+
+  <h1>반응 속도 테스트</h1>
+  <div id="box">클릭해서 시작</div>
+  <div id="result"></div>
+
+  <script>
+    const box = document.getElementById('box');
+    const result = document.getElementById('result');
+    let startTime, timeoutID;
+    let waiting = false;
+    let clickable = false;
+
+    box.addEventListener('click', () => {
+      if (!waiting && !clickable) {
+        // 시작 클릭
+        box.textContent = '초록색이 될 때까지 기다리세요...';
+        box.style.backgroundColor = 'red';
+        waiting = true;
+        result.textContent = '';
+
+        const delay = Math.floor(Math.random() * 3000) + 2000; // 2~5초 랜덤
+        timeoutID = setTimeout(() => {
+          box.style.backgroundColor = 'green';
+          box.textContent = '지금 클릭!';
+          startTime = new Date().getTime();
+          clickable = true;
+        }, delay);
+      } else if (waiting && !clickable) {
+        // 너무 일찍 클릭함
+        clearTimeout(timeoutID);
+        box.style.backgroundColor = 'red';
+        box.textContent = '너무 빨라요! 다시 시작하려면 클릭하세요.';
+        result.textContent = '';
+        waiting = false;
+      } else if (clickable) {
+        // 올바른 클릭
+        const reactionTime = new Date().getTime() - startTime;
+        box.style.backgroundColor = 'red';
+        box.textContent = '클릭해서 다시 시작';
+        result.textContent = `반응 속도: ${reactionTime}ms`;
+        waiting = false;
+        clickable = false;
+      }
+    });
+  </script>
+</body>
+</html>
